@@ -61,7 +61,46 @@ After 15 mins still the car is driving without incidents
 Behavior control of the car is based on the path planning, which consists of prediction,behavior planning and trajectory generation.
 
 #### Prediction
+The prediction component estimates what actions other objects might take in the future. For example, if another vehicle were identified, the prediction component would estimate its future trajectory. In this project prediction module predicts the following
+* Car ahead is too close to our car
+* Car in left and right is too close to our car.
+* Car in left and right making any lane change not safe.
+
+By calculating the lane each car is and the position it will be at the end of the last plan trajectory we will get the answers to the above questions. 
+In the simulator we have only three lanes and each lane has 4 meter width
+
+```
+    if(d > 0 && d < 4) {
+        check_car_lane = 0;
+    } else if(d > 4 && d < 8) {
+        check_car_lane = 1;
+    } else if(d > 8 and d < 12) {
+        check_car_lane = 2;
+    }
+
+```
+
+Estimate car's position after executing previous trajectory. A car is considered "dangerous" when its distance to our car is less than 30 meters.
+
+```
+    if(check_car_lane == lane) {
+        // Car in our lane.
+        car_ahead |= check_car_s > car_s && (check_car_s - car_s) < 30;					
+    } else if((check_car_lane - lane) == -1) {
+        // Car left
+        car_left |= (car_s+30) > check_car_s  && (car_s-30) < check_car_s;
+    } else if((check_car_lane - lane) == 1) {
+        // Car right
+        car_right |= (car_s+30) > check_car_s  && (car_s-30) < check_car_s;
+    }
+
+```
+
 #### Behavior planning
+Following behavior of car need to be planned.
+* Do we need to change the lane if there is car in front of us?
+* Do we need to speed up or slow down?
+
 #### Trajectory generation
 
 ## Reference

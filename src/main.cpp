@@ -98,22 +98,23 @@ int main() {
           // Sensor Fusion Data, a list of all other cars on the same side 
           //   of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
+          //Provided previous path point size.
           int prev_size = previous_path_x.size();
 
 						//PREDICTION
 
 						/***
-						The prediction component estimates what actions other objects might take in the future. For example, if another vehicle were identified, the prediction component would estimate its future trajectory.
+						The prediction component estimates what actions other objects might take in the future. 
+            For example, if another vehicle were identified, the prediction component would estimate its future trajectory.
+
+            In this example prediction module we use to find out following 
+            car ahead is too close, car on the left is too close, and car on the right is too close.
+
+            For this highway project no need to predict the trajectory of each 
+            vehicle as those vehicles trajectory will be on the straight lane.
 						***/
 
-						/*
-							In this example prediction module we use to find out following
-							car ahead is too close, car on the left is too close, and car on the right is too close.
-
-							As explained actual prediction module will be implementd using the apparoach mentioned above, but this highway project
-							doesnt need to predict the trajectory of each vehicle as those vehicles trajectory will be on the straight lane.
-						*/
-
+           //Preventing collitions
 						if(prev_size > 0) {
 							car_s = end_path_s;
 						}
@@ -127,9 +128,7 @@ int main() {
 
 							int check_car_lane;
 
-							/*Currently we assume that we have only three lanes and each lane has 4 meter width. In actual scenarion, 
-							number of lanes an ddistance between the lanes and total lanes distance can be detected using computer vision 
-							technologies. We slightly touched in advanced lane findings in term1. 
+							/*Currently we assume that we have only three lanes and each lane has 4 meter width. 
 							*/
 							if(d > 0 && d < 4) {
 								check_car_lane = 0;
@@ -138,24 +137,24 @@ int main() {
 							} else if(d > 8 and d < 12) {
 								check_car_lane = 2;
 							} 	
-							
+							// Find car speed.
 							double vx = sensor_fusion[i][3];
 							double vy = sensor_fusion[i][4];
 							double check_speed = sqrt(vx*vx+vy*vy);
 							double check_car_s = sensor_fusion[i][5];	
 
-							//This will help to predict the where the vehicle will be in future
+							 // Estimate car's position after executing previous trajectory.
 							check_car_s += ((double)prev_size*0.02*check_speed);
 							if(check_car_lane == lane) {
-								//A vehicle is on the same line and check the car is in front of the ego car
+								// Car in our lane.
 								car_ahead |= check_car_s > car_s && (check_car_s - car_s) < 30;										
 
 							} else if((check_car_lane - lane) == -1) {
-								//A vehicle is on the left lane and check that is in 30 meter range
+								// Car left
 								car_left |= (car_s+30) > check_car_s  && (car_s-30) < check_car_s;
 
 							} else if((check_car_lane - lane) == 1) {
-								//A vehicle is on the right lane and check that is in 30 meter range
+								// Car right
 								car_right |= (car_s+30) > check_car_s  && (car_s-30) < check_car_s;
 							
 							}
