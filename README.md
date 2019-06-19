@@ -12,6 +12,8 @@
 
 
 ![alt text][image3]
+
+---
    
 ## Project Introduction
 
@@ -30,6 +32,8 @@ The Udacity provided [simulator](https://github.com/udacity/self-driving-car-sim
 * Udacity simulator
 * Udacity [seed project](https://github.com/udacity/CarND-Path-Planning-Project)
 * [Spline](http://kluge.in-chemnitz.de/opensource/spline/) for creating smooth trajectories
+
+---
 
 ## Rubric Points
 
@@ -52,7 +56,9 @@ After 15 mins still the car is driving without incidents
 
 ![alt text][image1]
 
-### Reflection
+---
+
+## Reflection
 
 #### Behavior control
 
@@ -102,6 +108,8 @@ Following behavior of car need to be planned.
 * Do we need to speed up or slow down?
 
 #### Trajectory generation
+
+---
 
 ## Reference
 * [Path planning project](https://github.com/darienmt/CarND-Path-Planning-Project-P1)
