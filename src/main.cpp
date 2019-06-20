@@ -196,7 +196,7 @@ int main() {
           // If previous states are almost empty, use the car as a startting point
           if ( prev_size < 2 ) {
 
-              //Use two points thats makes path tangent to the car
+              //Use two points that make path tangent to the car
               double prev_car_x = car_x - cos(car_yaw);
               double prev_car_y = car_y - sin(car_yaw);
 

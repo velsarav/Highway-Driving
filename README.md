@@ -18,7 +18,7 @@
    
 ## Project Introduction
 
-Design a path planner that is able to create smooth, safe paths for the car to follow along a 3 lane highway with traffic. Project goal is to safely navigate around a simulated highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. 
+Design a path planner that is able to create smooth, safe paths for the car to follow along a 3 lane highway with traffic. The Project goal is to safely navigate around a simulated highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. 
 
 ## Simulator
 The Udacity provided [simulator](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2) sends car telemetry information (car's position and velocity) and sensor fusion information about the rest of the car in the highway (car id , velocity and position). The communication between the simulator and the path planner is done using [WebSocket](https://en.wikipedia.org/wiki/WebSocket). 
@@ -40,7 +40,7 @@ The Udacity provided [simulator](https://github.com/udacity/self-driving-car-sim
 
 The [rubric](https://review.udacity.com/#!/rubrics/1971/view) points were individually addressed in the [implementation](https://github.com/velsarav/Highway-Driving)
 
-### Compilation and connection to simulator
+### Compilation and connection to the simulator
 The code compiles correctly.
 
 ![alt text][image5]
@@ -53,7 +53,7 @@ The car started the trajectory of the path
 
 ![alt text][image2]
 
-After 15 mins still the car is driving without incidents
+After 15 mins still, the car is driving without incidents
 
 ![alt text][image1]
 
@@ -65,7 +65,7 @@ After 15 mins still the car is driving without incidents
 
 ![alt text][image4]
 
-Behavior control of the car is based on the path planning, which consists of prediction,behavior planning and trajectory generation.
+Behavior control of the car is based on path planning, which consists of prediction, behavior planning and trajectory generation.
 
 #### Prediction
 The prediction component estimates what actions other objects might take in the future. For example, if another vehicle were identified, the prediction component would estimate its future trajectory. In this project prediction module predicts the following
@@ -74,7 +74,7 @@ The prediction component estimates what actions other objects might take in the 
 * Car in left and right making any lane change not safe.
 
 By calculating the lane each car is and the position it will be at the end of the last plan trajectory we will get the answers to the above questions. 
-In the simulator we have only three lanes and each lane has 4 meter width
+In the simulator, we have only three lanes and each lane has 4-meter width
 
 ```
     if(d > 0 && d < 4) {
@@ -87,7 +87,7 @@ In the simulator we have only three lanes and each lane has 4 meter width
 
 ```
 
-Estimate car's position after executing previous trajectory. A car is considered "dangerous" when its distance to our car is less than 30 meters.
+Estimate the car's position after executing the previous trajectory. A car is considered "dangerous" when its distance to our car is less than 30 meters.
 
 ```
     if(check_car_lane == lane) {
@@ -105,13 +105,13 @@ Estimate car's position after executing previous trajectory. A car is considered
 
 #### Behavior planning
 
-Following behavior of car need to be planned.
-* Do we need to change the lane if there is car in front of us?
+Following the behavior of the car needs to be planned.
+* Do we need to change the lane if there is a car in front of us?
 * Do we need to speed up or slow down?
 
 ![alt text][image7]
 
-Behavior planner takes the input of maps, route and predictions about what other vehicles are likely to do and suggest the trajectory module to create trajectory based on the suggestion from the behavior planner. Prediction set three flags(car_ahead, car_left, and car_right) according to the sensor fusion data. If the car is not ahead and velocity is not same as max_accel, then it will increase the speed by small difference during each check.
+Behavior planner takes the input of maps, route, and predictions about what other vehicles are likely to do and suggests the trajectory module create trajectory based on the suggestion from the behavior planner. Prediction set three flags(car_ahead, car_left, and car_right) according to the sensor fusion data. If the car is not ahead and velocity is not the same as max_accel, then it will increase the speed by small difference during each check.
 
 ```
 if(car_ahead) {
@@ -135,14 +135,14 @@ if(car_ahead) {
 #### Trajectory generation
 Calculation of the trajectory is based on the speed and lane output from the behavior, car coordinates and past path points.
 
-Check any previous points is almost empty, then we use current car's point to find the previous point and add them to the list, else just add previous two points. Also push back last know previous point to reference x and y
+Check any previous points is almost empty, then we use the current car's point to find the previous point and add them to the list, else just add the previous two points. Also, push back last know the previous point to reference x and y
 
 ```
 // If previous states are almost empty, use the car as a startting point
 if ( prev_size < 2 ) {
 
-    //Use two points thats makes path tangent to the car
-                    double prev_car_x = car_x - cos(car_yaw);
+    //Use two points that make path tangent to the car
+    double prev_car_x = car_x - cos(car_yaw);
     double prev_car_y = car_y - sin(car_yaw);
 
     ptsx.push_back(prev_car_x);
@@ -168,7 +168,15 @@ if ( prev_size < 2 ) {
 }
 ```
 
-Now we need to add 3 future points to ptsx, psy vecotrs. As car_s is frenet and we need to convert to the global x,y coordinates using getXY function. In total ptsx, ptsy has got 5 points in total each.
+Now we need to add 3 future points to ptsx, psy vecotrs. As car_s is frenet and we need to convert to the global x,y coordinates using getXY function. In total ptsx, ptsy has got 5 points in total each. Line number [226 to 237](https://github.com/velsarav/Highway-Driving/blob/master/src/main.cpp#L226)
+
+For trajectory generation, we are using spline instead of polynomial trajectory generation. One of the reasons is it is simple to use and requires no dependencies.
+
+Then we add all previous points to next_x_vals and next_y_vals as it going to be the final control values pass it to the simulator and it will help to get a smooth transition to the new points that we calculate later. Line number [252 to 259](https://github.com/velsarav/Highway-Driving/blob/master/src/main.cpp#L252)
+
+Now we need to find the all spline points till the horizon(say 30m) value so that spacing the way that other car can travel at the desired speed. Remember the speed of the car is depending on the spacing between the points. If we know x point(ie 30m in this case), spline will be able to get us corresponding spline y points. Line number [262 to 264](https://github.com/velsarav/Highway-Driving/blob/master/src/main.cpp#L262)
+
+Our number of points has to be calculated is 50. We need to future points and previous points for the trajectory calculation. next_x_vals and next_y_vals calculation between line number[268 to 288](https://github.com/velsarav/Highway-Driving/blob/master/src/main.cpp#L268) will have all 50 points which consist of 3 future points and 47 previous points.
 
 
 ---
