@@ -9,6 +9,7 @@
 [image4]: ./docs/Behavior_control.png "Behavior Control"
 [image5]: ./docs/Compilation.png "Compilation"
 [image6]: ./docs/Simulation_connection.png "Simulator connection"
+[image7]: ./docs/Behavioral_overview.png "Behavioral planning"
 
 
 ![alt text][image3]
@@ -103,11 +104,72 @@ Estimate car's position after executing previous trajectory. A car is considered
 ```
 
 #### Behavior planning
+
 Following behavior of car need to be planned.
 * Do we need to change the lane if there is car in front of us?
 * Do we need to speed up or slow down?
 
+![alt text][image7]
+
+Behavior planner takes the input of maps, route and predictions about what other vehicles are likely to do and suggest the trajectory module to create trajectory based on the suggestion from the behavior planner. Prediction set three flags(car_ahead, car_left, and car_right) according to the sensor fusion data. If the car is not ahead and velocity is not same as max_accel, then it will increase the speed by small difference during each check.
+
+```
+if(car_ahead) {
+    if(!car_left && lane > 0) {
+        // if there is no car left and there is a left lane.
+        lane--; // Change lane left.
+    } else if(!car_right && lane !=2) {
+        // if there is no car right and there is a right lane.
+        lane++;// Change lane right.
+    } else if(!car_left && lane !=2) {
+        lane++;
+    }else {
+        ref_vel -= speed_diff;
+    }
+} else if(ref_vel < max_accel){
+    ref_vel += speed_diff;
+}
+```
+
+
 #### Trajectory generation
+Calculation of the trajectory is based on the speed and lane output from the behavior, car coordinates and past path points.
+
+Check any previous points is almost empty, then we use current car's point to find the previous point and add them to the list, else just add previous two points. Also push back last know previous point to reference x and y
+
+```
+// If previous states are almost empty, use the car as a startting point
+if ( prev_size < 2 ) {
+
+    //Use two points thats makes path tangent to the car
+                    double prev_car_x = car_x - cos(car_yaw);
+    double prev_car_y = car_y - sin(car_yaw);
+
+    ptsx.push_back(prev_car_x);
+    ptsx.push_back(car_x);
+
+    ptsy.push_back(prev_car_y);
+    ptsy.push_back(car_y);
+
+    } else {
+    //Redefine the reference point to previous point
+    ref_x = previous_path_x[prev_size - 1];
+    ref_y = previous_path_y[prev_size - 1];
+
+    double ref_x_prev = previous_path_x[prev_size - 2];
+    double ref_y_prev = previous_path_y[prev_size - 2];
+    ref_yaw = atan2(ref_y-ref_y_prev, ref_x-ref_x_prev);
+
+    ptsx.push_back(ref_x_prev);
+    ptsx.push_back(ref_x);
+
+    ptsy.push_back(ref_y_prev);
+    ptsy.push_back(ref_y);
+}
+```
+
+Now we need to add 3 future points to ptsx, psy vecotrs. As car_s is frenet and we need to convert to the global x,y coordinates using getXY function. In total ptsx, ptsy has got 5 points in total each.
+
 
 ---
 

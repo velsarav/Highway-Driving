@@ -160,14 +160,11 @@ int main() {
 							}
 						}
 
-						//As we said, actual prediction module gives the possible trajectories from the current timeline to the future of each vehicle. 
-						//In this highway exmaple, we will have only one possible trajectory for each vehicle and that is why we are using simple approach as above.
-						//In complex situation we may need to use model, data, or hybrid approach for prdiction module
-						
 						//BEHAVIOUR
 						/***
 						The behavioral planning component determines what behavior the vehicle should exhibit at any point in time. 
-						For example stopping at a traffic light or intersection, changing lanes, accelerating, or making a left turn onto a new street are all maneuvers that may be issued by this component.
+						For example stopping at a traffic light or intersection, changing lanes, accelerating, or making a left turn onto a new street 
+            are all maneuvers that may be issued by this component.
 						***/
 						if(car_ahead) {
 							if(!car_left && lane > 0) {
@@ -182,12 +179,11 @@ int main() {
 						} else if(ref_vel < max_accel){
 							ref_vel += speed_diff;
 						}
-						//In actual case, behaviour planner decides the trajectory based on the cost functions.
-						//In this highway example, we may no need to worry about cost functions as we are considering only lane change or reduce speed based on the obstacles. 
-
+						
 						//TRAJECTORY
 						/***
-						Based on the desired immediate behavior, the trajectory planning component will determine which trajectory is best for executing this behavior.
+						Based on the desired immediate behavior, the trajectory planning component will determine which trajectory is best 
+            for executing this behavior.
 						***/
 						vector<double> ptsx;
             vector<double> ptsy;
@@ -292,12 +288,6 @@ int main() {
 						}
 
           json msgJson;
-
-          /**
-           * TODO: define a path made up of (x,y) points that the car will visit
-           *   sequentially every .02 seconds
-           */
-
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
